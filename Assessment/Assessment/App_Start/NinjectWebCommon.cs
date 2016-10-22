@@ -10,6 +10,7 @@ namespace Assessment.App_Start
 
     using Ninject;
     using Ninject.Web.Common;
+    using Repositories;
 
     public static class NinjectWebCommon 
     {
@@ -44,7 +45,8 @@ namespace Assessment.App_Start
             {
                 kernel.Bind<Func<IKernel>>().ToMethod(ctx => () => new Bootstrapper().Kernel);
                 kernel.Bind<IHttpModule>().To<HttpApplicationInitializationHttpModule>();
-
+                //Bind interface IImageService to ImageRepository so it can injected to a controller
+                kernel.Bind<IImagesService>().To<ImageRepository>();
                 RegisterServices(kernel);
                 return kernel;
             }
