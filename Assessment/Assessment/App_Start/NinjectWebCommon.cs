@@ -47,6 +47,8 @@ namespace Assessment.App_Start
                 kernel.Bind<IHttpModule>().To<HttpApplicationInitializationHttpModule>();
                 //Bind interface IImageService to ImageRepository so it can injected to a controller
                 kernel.Bind<IImagesService>().To<ImageRepository>();
+                //Bind interface IStorageService to AzureStorage so it can injected to ImageRepository
+                kernel.Bind<IStorageService>().To<AzureStorage>();
                 RegisterServices(kernel);
                 return kernel;
             }

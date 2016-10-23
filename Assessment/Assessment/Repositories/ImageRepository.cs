@@ -8,8 +8,14 @@ namespace Assessment.Repositories
 {
     public class ImageRepository : IImagesService
     {
-        ImagesDbContext context = new ImagesDbContext();
+        private ImagesDbContext context = new ImagesDbContext();
+        private IStorageService storageService;
 
+        //Inject a storage service from the constructor
+        public ImageRepository(IStorageService storageService)
+        {
+            this.storageService = storageService;
+        }
         /// <summary>
         /// Returns all images 
         /// </summary>
@@ -24,8 +30,10 @@ namespace Assessment.Repositories
         /// Part of the operation is to store the Image in the blob storage.
         /// *This method will have to change,so it will also take a photo parameter
         /// </summary>
-        public int AddNewImage(Image image)
+        public int AddNewImage(Image image,HttpPostedFileBase postedImage)
         {
+            //set the image path to the uploaded file's path
+            image.ImagePath=storageService.CreateImage(postedImage);
             context.Images.Add(image);
             context.SaveChanges();
             return image.Id;
@@ -40,6 +48,10 @@ namespace Assessment.Repositories
             Image entry = context.Images.Find(id);
             if (entry != null)
             {
+                if(entry.ImagePath!=null)
+                {
+                    storageService.DeleteImage(entry.ImagePath);
+                }
                 context.Images.Remove(entry);
                 context.SaveChanges();
             }

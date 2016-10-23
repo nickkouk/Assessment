@@ -85,7 +85,7 @@ namespace Assessment.Repositories
         {
             try
             {
-                CloudBlockBlob blockBlob = container.GetBlockBlobReference(uri);
+                CloudBlockBlob blockBlob = container.GetBlockBlobReference(Path.GetFileName(uri));
                 blockBlob.DeleteIfExists();
             }
             catch(Exception exc)
