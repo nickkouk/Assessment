@@ -61,7 +61,7 @@ namespace Assessment.Repositories
             try
             {
                 // Create a unique name for the image we are about to store
-                string imageName = String.Format("photo_{0}_{1}",
+                string imageName = String.Format("photo_{0}{1}",
                     Guid.NewGuid().ToString(),
                     Path.GetExtension(postedImage.FileName));
 
