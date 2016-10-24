@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-
+using System.ComponentModel.DataAnnotations;
 namespace Assessment.Models
 {
     public class Image
@@ -16,10 +16,13 @@ namespace Assessment.Models
         /// <summary>
         /// The name of the image. It can be different than actual file name.
         /// </summary>
+        [Required]
+        [RegularExpression("^[a-zA-Z0-9_]*$", ErrorMessage ="Name should only contain alphanumeric characters and undersocores!")]
+        [StringLength(100,MinimumLength =4,ErrorMessage ="Name must be at least 4 characters long!")]
         public string Name { get; set; }
 
         /// <summary>
-        /// The description of the image
+        /// The optional description of the image
         /// </summary>
         public string Description { get; set; }
 
