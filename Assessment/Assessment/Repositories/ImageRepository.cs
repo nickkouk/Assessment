@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Assessment.Models;
+using Assessment.Logging;
+using System.Diagnostics;
 
 namespace Assessment.Repositories
 {
@@ -10,11 +12,13 @@ namespace Assessment.Repositories
     {
         private ImagesDbContext context = new ImagesDbContext();
         private IStorageService storageService;
+        private ILogger logger;
 
-        //Inject a storage service from the constructor
-        public ImageRepository(IStorageService storageService)
+        //Inject a storage service and a logger from the constructor
+        public ImageRepository(IStorageService storageService,ILogger logger)
         {
             this.storageService = storageService;
+            this.logger = logger;
         }
         /// <summary>
         /// Returns all images 
@@ -32,10 +36,24 @@ namespace Assessment.Repositories
         /// </summary>
         public int AddNewImage(Image image,HttpPostedFileBase postedImage)
         {
-            //set the image path to the uploaded file's path
-            image.ImagePath=storageService.CreateImage(postedImage);
-            context.Images.Add(image);
-            context.SaveChanges();
+            try
+            {
+                //Call a service to upload the image and store the path to the database entry.
+                image.ImagePath = storageService.CreateImage(postedImage);
+                //Start a stopwatch after the image is uploaded in order to Trace the database transaction time elapsed
+                Stopwatch timespan = Stopwatch.StartNew();
+
+                context.Images.Add(image);
+                context.SaveChanges();
+
+                timespan.Stop();
+                logger.TraceApi("SQL Database", "ImageRepository.AddNewImage", timespan.Elapsed,"Successfully added image to database.");
+            }
+            catch (Exception exc)
+            {
+                logger.Error(exc, "failed to add Image to Database");
+                throw;
+            }
             return image.Id;
         }
 
@@ -45,16 +63,28 @@ namespace Assessment.Repositories
         /// </summary>
         public void DeleteImage(int id)
         {
-            Image entry = context.Images.Find(id);
-            if (entry != null)
+            try
             {
-                if(entry.ImagePath!=null)
+                Image entry = context.Images.Find(id);
+                if (entry != null)
                 {
-                    storageService.DeleteImage(entry.ImagePath);
+                    if (entry.ImagePath != null)
+                    {
+                        storageService.DeleteImage(entry.ImagePath);
+                    }
+                    context.Images.Remove(entry);
+                    
+                    context.SaveChanges();
+                    logger.Information("Successfully deleted image:{0} from Database",id);
+                   
                 }
-                context.Images.Remove(entry);
-                context.SaveChanges();
             }
+            catch(Exception exc)
+            {
+                logger.Error(exc, "Failed to delete image:{0} from Database",id);
+                throw;
+            }
+           
         }
     }
 

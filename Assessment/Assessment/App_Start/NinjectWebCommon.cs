@@ -5,13 +5,11 @@ namespace Assessment.App_Start
 {
     using System;
     using System.Web;
-
     using Microsoft.Web.Infrastructure.DynamicModuleHelper;
-
     using Ninject;
     using Ninject.Web.Common;
     using Repositories;
-
+    using Logging;
     public static class NinjectWebCommon 
     {
         private static readonly Bootstrapper bootstrapper = new Bootstrapper();
@@ -49,6 +47,8 @@ namespace Assessment.App_Start
                 kernel.Bind<IImagesService>().To<ImageRepository>();
                 //Bind interface IStorageService to AzureStorage so it can injected to ImageRepository
                 kernel.Bind<IStorageService>().To<AzureStorage>();
+                //Bind interface ILogger to Logger 
+                kernel.Bind<ILogger>().To<Logger>();
                 RegisterServices(kernel);
                 return kernel;
             }
