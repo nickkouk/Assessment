@@ -8,6 +8,7 @@ using System.Web;
 using System.Web.Mvc;
 using Assessment.Models;
 using Assessment.Repositories;
+using System.IO;
 
 namespace Assessment.Controllers
 {
@@ -26,6 +27,7 @@ namespace Assessment.Controllers
         // GET: Images
         public ActionResult Index()
         {
+
             return View(imageRepository.GetImages());
         }
 
@@ -59,44 +61,20 @@ namespace Assessment.Controllers
         {
             if (ModelState.IsValid)
             {
-                imageRepository.AddNewImage(image,postedImage);
-                return RedirectToAction("Index");
+                string imageError=string.Empty;
+                if(!isImageSupported(postedImage,ref imageError))
+                {
+                    ModelState.AddModelError("ImagePath",imageError);
+                    return View(image);
+                }
+                int id=imageRepository.AddNewImage(image,postedImage);
+                return RedirectToAction("Details", new { id = id });
             }
 
             return View(image);
         }
 
-        //For the Assesment Edit View wasn't requested
-        //// GET: Images/Edit/5
-        //public ActionResult Edit(int? id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-        //    }
-        //    Image image = db.Images.Find(id);
-        //    if (image == null)
-        //    {
-        //        return HttpNotFound();
-        //    }
-        //    return View(image);
-        //}
 
-        //// POST: Images/Edit/5
-        //// To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        //// more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public ActionResult Edit([Bind(Include = "Id,Name,Description,ImagePath")] Image image)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-
-
-        //        return RedirectToAction("Index");
-        //    }
-        //    return View(image);
-        //}
 
         // GET: Images/Delete/5
         public ActionResult Delete(int? id)
@@ -120,6 +98,38 @@ namespace Assessment.Controllers
         {
             imageRepository.DeleteImage(id);
             return RedirectToAction("Index");
+        }
+
+
+        /// <summary>
+        /// Checks if <paramref name="image"/> is supported 
+        /// </summary>
+        private bool isImageSupported(HttpPostedFileBase image,ref string error)
+        {
+            if(image==null || image.ContentLength == 0)
+            {
+                error = "No image selected";
+                return false;
+            }
+            //max 100mb image
+            if (image.ContentLength > 100000000)
+            {
+                error = "Image file can't be larger than 100mb";
+                return false;
+            }
+            //supported image types.
+            string[] imagetypes = { ".jpg", ".png", ".gif", ".jpeg" };
+            if (!image.ContentType.ToLower().Contains("image"))
+            {
+                error = "Not Supported Image";
+                return false;
+            }
+            if (!imagetypes.Contains(Path.GetExtension(image.FileName).ToLower()))
+            {
+                error = "Not Supported Image";
+                return false;
+            }
+            return true;
         }
 
     }

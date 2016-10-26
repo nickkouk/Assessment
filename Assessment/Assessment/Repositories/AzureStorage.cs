@@ -61,11 +61,11 @@ namespace Assessment.Repositories
         {
             //create a stopwatch for every image upload to calculate time elapsed.
             Stopwatch timespan = Stopwatch.StartNew();
-
             string photoPath = String.Empty;
+
             if (postedImage == null || postedImage.ContentLength == 0)
             { 
-                logger.Warning("Couldn't upload file to Azure Blob Storage. Posted file was empty.");
+                logger.Warning("Couldn't upload image to Azure Blob Storage. Posted file was empty.");
                 return null;
             }
             try
@@ -111,5 +111,7 @@ namespace Assessment.Repositories
                 throw;
             }
         }
+
+       
     }
 }
