@@ -118,7 +118,7 @@ namespace Assessment.Controllers
                 return false;
             }
             //supported image types.
-            string[] imagetypes = { ".jpg", ".png", ".gif", ".jpeg" };
+            string[] imagetypes = { ".jpg", ".png", ".gif", ".jpeg", ".bmp" };
             if (!image.ContentType.ToLower().Contains("image"))
             {
                 error = "Not Supported Image";
